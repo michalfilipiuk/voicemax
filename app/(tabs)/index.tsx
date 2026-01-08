@@ -1,98 +1,154 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { StreakDisplay, VoiceStatsCard, WorkoutCard } from '@/components/dashboard';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useUser } from '@/context/UserContext';
+import { useVoice } from '@/context/VoiceContext';
+import { useWorkout } from '@/context/WorkoutContext';
+import { Spacing } from '@/styles/spacing';
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { user } = useUser();
+  const { latestMeasurement, getPitchTrend } = useVoice();
+  const { progress, getTodaysWorkout } = useWorkout();
+
+  const todaysWorkout = getTodaysWorkout();
+  const isWorkoutCompleted = !!todaysWorkout;
+  const pitchTrend = getPitchTrend();
+
+  // Map trend to component format
+  const trend = pitchTrend === 'improving' ? 'down' : pitchTrend === 'declining' ? 'up' : undefined;
+
+  const handleMeasureVoice = () => {
+    // Navigate to quick measure screen (we'll create this)
+    router.push('/workout/intro' as any);
+  };
+
+  const handleStartWorkout = () => {
+    router.push('/workout/intro' as any);
+  };
+
+  const greeting = getGreeting();
+  const displayName = user.firstName || 'there';
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + Spacing.md },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.greetingSection}>
+            <ThemedText type="headlineMedium">
+              {greeting}, {displayName}
+            </ThemedText>
+            <ThemedText type="bodyRegular" style={styles.subtitle}>
+              Ready to train your voice?
+            </ThemedText>
+          </View>
+          <StreakDisplay streak={progress.currentStreak} />
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {/* Workout Card */}
+        <WorkoutCard
+          isCompleted={isWorkoutCompleted}
+          exercisesCompleted={todaysWorkout?.exercises.length || 0}
+          totalExercises={5}
+          onStartPress={handleStartWorkout}
+        />
+
+        {/* Voice Stats Card */}
+        <VoiceStatsCard
+          currentPitch={latestMeasurement?.pitchHz}
+          baselinePitch={user.baselinePitch ?? undefined}
+          trend={trend}
+          onMeasurePress={handleMeasureVoice}
+        />
+
+        {/* Quick Stats */}
+        <View style={styles.statsRow}>
+          <StatItem
+            label="Total Workouts"
+            value={progress.totalWorkouts.toString()}
+          />
+          <StatItem
+            label="Minutes Trained"
+            value={progress.totalMinutes.toString()}
+          />
+          <StatItem
+            label="Best Streak"
+            value={progress.longestStreak.toString()}
+          />
+        </View>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
+function StatItem({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.statItem}>
+      <ThemedText type="headlineSmall">{value}</ThemedText>
+      <ThemedText type="bodySmall" style={styles.statLabel}>
+        {label}
+      </ThemedText>
+    </View>
+  );
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.lg,
+  },
+  header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  greetingSection: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  subtitle: {
+    opacity: 0.7,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statItem: {
+    flex: 1,
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  statLabel: {
+    opacity: 0.6,
+    textAlign: 'center',
   },
 });

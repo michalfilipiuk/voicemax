@@ -5,25 +5,94 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    // Brand
+    brandBg: '#FBF8F1',
+    brandContent: '#B8963E',
+    contentOnBrand: '#FFFFFF',
+
+    // Background
+    bgMain: '#FFFFFF',
+    bgSecondary: '#FAFAFA',
+    bgTertiary: '#F5F5F5',
+
+    // Content
+    contentDisabled: '#D4D4D4',
+    contentSubtle: '#A3A3A3',
+    contentNormal: '#737373',
+    contentMuted: '#404040',
+    contentStrong: '#0A0A0A',
+
+    // Alpha (opacity variants)
+    alphaSubtle: 'rgba(0, 0, 0, 0.05)',
+    alphaMedium: 'rgba(0, 0, 0, 0.10)',
+    alphaStrong: 'rgba(0, 0, 0, 0.15)',
+    alphaOverlay: 'rgba(0, 0, 0, 0.50)',
+
+    // Success
+    successBg: 'rgba(16, 185, 129, 0.15)',
+    successContent: '#10B981',
+
+    // Error
+    errorBg: 'rgba(239, 68, 68, 0.15)',
+    errorContent: '#EF4444',
+
+    // Alert
+    alertBg: 'rgba(249, 115, 22, 0.15)',
+    alertContent: '#F97316',
+
+    // Info
+    infoBg: 'rgba(14, 165, 233, 0.15)',
+    infoContent: '#0EA5E9',
+
+    // Tab navigation (using semantic colors)
+    tabIconDefault: '#737373',
+    tabIconSelected: '#0A0A0A',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    // Brand
+    brandBg: '#1A1714',
+    brandContent: '#D4AF5C',
+    contentOnBrand: '#1A1714',
+
+    // Background
+    bgMain: '#000000',
+    bgSecondary: '#171717',
+    bgTertiary: '#262626',
+
+    // Content
+    contentDisabled: '#525252',
+    contentSubtle: '#A3A3A3',
+    contentNormal: '#D4D4D4',
+    contentMuted: '#E5E5E5',
+    contentStrong: '#FAFAFA',
+
+    // Alpha (opacity variants)
+    alphaSubtle: 'rgba(255, 255, 255, 0.05)',
+    alphaMedium: 'rgba(255, 255, 255, 0.10)',
+    alphaStrong: 'rgba(255, 255, 255, 0.15)',
+    alphaOverlay: 'rgba(255, 255, 255, 0.15)',
+
+    // Success
+    successBg: 'rgba(16, 185, 129, 0.15)',
+    successContent: '#10B981',
+
+    // Error
+    errorBg: 'rgba(239, 68, 68, 0.15)',
+    errorContent: '#EF4444',
+
+    // Alert
+    alertBg: 'rgba(249, 115, 22, 0.15)',
+    alertContent: '#F97316',
+
+    // Info
+    infoBg: 'rgba(14, 165, 233, 0.15)',
+    infoContent: '#0EA5E9',
+
+    // Tab navigation (using semantic colors)
+    tabIconDefault: '#A3A3A3',
+    tabIconSelected: '#FAFAFA',
   },
 };
 

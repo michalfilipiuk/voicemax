@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "starter-file",
-    "slug": "starter-file",
+    "name": "VoiceMax",
+    "slug": "voicemax",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "starterfile",
+    "scheme": "voicemax",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
