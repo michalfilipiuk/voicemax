@@ -106,6 +106,8 @@ export function RecordingButton({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        style={styles.pressable}
       >
         <Animated.View
           style={[
@@ -133,6 +135,10 @@ export function RecordingButton({
 
 const styles = StyleSheet.create({
   container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pressable: {
     alignItems: 'center',
     justifyContent: 'center',
   },

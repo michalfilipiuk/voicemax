@@ -1,5 +1,8 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# IDE
+.idea/
+
 # dependencies
 node_modules/
 
@@ -41,3 +44,26 @@ app-example
 # generated native folders
 /ios
 /android
+
+# OpenSMILE - source code (we use precompiled libs)
+modules/expo-opensmile/ios/opensmile-src/
+
+# OpenSMILE - unused config directories (keep for potential future use)
+modules/expo-opensmile/ios/config/audiovisual/
+modules/expo-opensmile/ios/config/audspec/
+modules/expo-opensmile/ios/config/avec11-14/
+modules/expo-opensmile/ios/config/chroma/
+modules/expo-opensmile/ios/config/compare16/
+modules/expo-opensmile/ios/config/demo/
+modules/expo-opensmile/ios/config/egemaps/v01a/
+modules/expo-opensmile/ios/config/egemaps/v01b/
+modules/expo-opensmile/ios/config/emobase/
+modules/expo-opensmile/ios/config/gemaps/
+modules/expo-opensmile/ios/config/gui/
+modules/expo-opensmile/ios/config/is09-13/
+modules/expo-opensmile/ios/config/mediaeval12/
+modules/expo-opensmile/ios/config/mfcc/
+modules/expo-opensmile/ios/config/misc/
+modules/expo-opensmile/ios/config/plp/
+modules/expo-opensmile/ios/config/prosody/
+modules/expo-opensmile/ios/config/spectrum/

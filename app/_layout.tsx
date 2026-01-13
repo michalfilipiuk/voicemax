@@ -57,6 +57,10 @@ function NavigationContent() {
         name="workout"
         options={{ presentation: 'fullScreenModal' }}
       />
+      <Stack.Screen
+        name="measure"
+        options={{ presentation: 'fullScreenModal' }}
+      />
     </Stack>
   );
 }

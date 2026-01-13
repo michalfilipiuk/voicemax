@@ -26,8 +26,7 @@ export default function DashboardScreen() {
   const trend = pitchTrend === 'improving' ? 'down' : pitchTrend === 'declining' ? 'up' : undefined;
 
   const handleMeasureVoice = () => {
-    // Navigate to quick measure screen (we'll create this)
-    router.push('/workout/intro' as any);
+    router.push('/measure/intro');
   };
 
   const handleStartWorkout = () => {

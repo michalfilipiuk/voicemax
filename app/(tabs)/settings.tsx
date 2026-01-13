@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card } from '@/components/cards';
@@ -14,6 +14,7 @@ import { useUser } from '@/context/UserContext';
 import { useWorkout } from '@/context/WorkoutContext';
 import { useThemeColor } from '@/hooks/use-theme-color';
 import { Spacing, BorderRadius } from '@/styles/spacing';
+import { audioRecorder, analyzeVoiceSimple, type SimpleVoiceAnalysis } from '@/services/audio';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -29,6 +30,51 @@ export default function SettingsScreen() {
   const errorContent = useThemeColor({}, 'errorContent');
 
   const isDarkMode = theme === 'dark';
+  const [isRecording, setIsRecording] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<SimpleVoiceAnalysis | null>(null);
+
+  const primaryColor = useThemeColor({}, 'primary');
+
+  const handleTestVoiceAnalysis = async () => {
+    try {
+      const hasPermission = await audioRecorder.requestPermissions();
+      if (!hasPermission) {
+        Alert.alert('Permission Required', 'Microphone access is needed to test voice analysis.');
+        return;
+      }
+
+      // Start recording
+      setIsRecording(true);
+      setAnalysisResult(null);
+      await audioRecorder.startRecording();
+
+      // Record for 3 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Stop recording
+      const result = await audioRecorder.stopRecording();
+      setIsRecording(false);
+
+      if (!result?.uri) {
+        showToast('Recording failed', 'error');
+        return;
+      }
+
+      // Analyze
+      setIsAnalyzing(true);
+      const analysis = await analyzeVoiceSimple(result.uri);
+      setAnalysisResult(analysis);
+      setIsAnalyzing(false);
+
+      showToast('Analysis complete!', 'success');
+    } catch (error) {
+      setIsRecording(false);
+      setIsAnalyzing(false);
+      console.error('Voice analysis error:', error);
+      showToast('Analysis failed: ' + (error as Error).message, 'error');
+    }
+  };
 
   const handleToggleDarkMode = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -130,6 +176,107 @@ export default function SettingsScreen() {
           </View>
         </Card>
 
+        {/* Voice Analysis Test Section */}
+        <Card variant="elevated" style={styles.card}>
+          <ThemedText type="bodySmallMedium" style={{ color: contentSubtle }}>
+            VOICE ANALYSIS TEST
+          </ThemedText>
+          <ThemedText type="bodySmall" style={{ color: contentSubtle }}>
+            Test the new state-of-the-art voice analysis. Records 3 seconds of audio.
+          </ThemedText>
+          <Pressable
+            onPress={handleTestVoiceAnalysis}
+            disabled={isRecording || isAnalyzing}
+            style={[
+              styles.actionButton,
+              { backgroundColor: primaryColor, opacity: isRecording || isAnalyzing ? 0.6 : 1 },
+            ]}
+          >
+            {isRecording ? (
+              <View style={styles.recordingRow}>
+                <ActivityIndicator color="#fff" size="small" />
+                <ThemedText type="bodyRegularMedium" style={{ color: '#fff', marginLeft: 8 }}>
+                  Recording... (3s)
+                </ThemedText>
+              </View>
+            ) : isAnalyzing ? (
+              <View style={styles.recordingRow}>
+                <ActivityIndicator color="#fff" size="small" />
+                <ThemedText type="bodyRegularMedium" style={{ color: '#fff', marginLeft: 8 }}>
+                  Analyzing...
+                </ThemedText>
+              </View>
+            ) : (
+              <ThemedText type="bodyRegularMedium" style={{ color: '#fff' }}>
+                Test Voice Analysis
+              </ThemedText>
+            )}
+          </Pressable>
+
+          {analysisResult && (
+            <View style={styles.resultsContainer}>
+              <ThemedText type="bodySmallMedium" style={{ color: contentSubtle, marginBottom: 8 }}>
+                RESULTS
+              </ThemedText>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Pitch</ThemedText>
+                <ThemedText type="bodyRegularMedium">
+                  {analysisResult.pitch.hz} Hz ({analysisResult.pitch.category})
+                </ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Quality Score</ThemedText>
+                <ThemedText type="bodyRegularMedium">
+                  {analysisResult.quality.overall}/100 ({analysisResult.quality.category})
+                </ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Clarity (HNR)</ThemedText>
+                <ThemedText type="bodyRegularMedium">
+                  {analysisResult.metrics.hnr.toFixed(1)} dB ({analysisResult.metrics.hnrStatus})
+                </ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Jitter</ThemedText>
+                <ThemedText type="bodyRegularMedium">
+                  {analysisResult.metrics.jitter.toFixed(2)}% ({analysisResult.metrics.jitterStatus})
+                </ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Shimmer</ThemedText>
+                <ThemedText type="bodyRegularMedium">
+                  {analysisResult.metrics.shimmer.toFixed(2)} dB ({analysisResult.metrics.shimmerStatus})
+                </ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Formant F1</ThemedText>
+                <ThemedText type="bodyRegularMedium">{analysisResult.formants.f1} Hz</ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Formant F2</ThemedText>
+                <ThemedText type="bodyRegularMedium">{analysisResult.formants.f2} Hz</ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Formant F3</ThemedText>
+                <ThemedText type="bodyRegularMedium">{analysisResult.formants.f3} Hz</ThemedText>
+              </View>
+
+              <View style={styles.resultRow}>
+                <ThemedText type="bodyRegular">Vocal Tract Length</ThemedText>
+                <ThemedText type="bodyRegularMedium">{analysisResult.formants.vocalTractLength} cm</ThemedText>
+              </View>
+            </View>
+          )}
+        </Card>
+
         {/* Data Section */}
         <Card variant="elevated" style={styles.card}>
           <ThemedText type="bodySmallMedium" style={{ color: contentSubtle }}>
@@ -218,5 +365,22 @@ const styles = StyleSheet.create({
   },
   version: {
     textAlign: 'center',
+  },
+  recordingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resultsContainer: {
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  resultRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.xs,
   },
 });
